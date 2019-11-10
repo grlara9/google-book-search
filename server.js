@@ -1,24 +1,32 @@
 const express = require('express');
 const path = require('path');
+var mongoose = require("mongoose");
+const routes = require("./routes")
 
 const app = express();
 
-// Serve the static files from the React app
-app.use(express.static(path.join(__dirname, 'client/build')));
+const PORT = process.env.PORT || 3001;
 
-// An api endpoint that returns a short list of items
-app.get('/api/getList', (req,res) => {
-    var list = ["item1", "item2", "item3"];
-    res.json(list);
-    console.log('Sent list of items');
+
+// Define middleware here
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+//For connecting MongoDB
+const mongoose = require("mongoose");
+// Connect to the Mongo DB
+mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/reactgooglebooks");
+
+
+// Serve up static assets (usually on heroku)
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static("client/build"));
+}
+
+// Add routes, both API and view
+app.use(routes);
+
+// Start the API server
+app.listen(PORT, function() {
+  console.log("Listening on PORT" + PORT);
 });
-
-// Handles any requests that don't match the ones above
-//app.get('*', (req,res) =>{
-  //  res.sendFile(path.join(__dirname+'/client/build/index.html'));
-//});
-
-const port = process.env.PORT || 5000;
-app.listen(port);
-
-console.log('App is listening on port ' + port);
